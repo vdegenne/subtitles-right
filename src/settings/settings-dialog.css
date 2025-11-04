@@ -1,0 +1,45 @@
+md-dialog {
+	max-width: min(500px, calc(100vw - 24px));
+	width: 100%;
+	/* style="max-width:min(100vw - 18px, 400px);width:100%" */
+}
+
+________section {
+	/* display: flex; */
+	/* flex-direction: column; */
+	/* gap: 16px; */
+	margin-bottom: 48px;
+}
+/* section h3 { */
+/* 	margin: 9px 0 0; */
+/* } */
+
+md-list {
+	padding: 0;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+md-elevated-card,
+md-outlined-card,
+md-filled-card {
+	padding: 4px;
+	align-items: start;
+	--md-elevated-card-container-elevation: 1;
+	--md-filled-card-container-elevation: 1;
+}
+
+md-elevated-card > section,
+md-outlined-card > section,
+md-filled-card > section {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 8px;
+	width: 100%;
+	box-sizing: border-box;
+}
