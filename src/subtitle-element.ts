@@ -7,14 +7,18 @@ import {withStyles} from 'lit-with-styles'
 import {customElement, property, query} from 'lit/decorators.js'
 import {deleteSubtitle} from './dialogs.js'
 import {subtitlesUI} from './subtitles-element.js'
+import {videoUI} from './video-element.js'
 
 @customElement('subtitle-element')
 @withStyles(css`
 	#led {
-		width: 4px;
+		width: 6px;
 	}
 	:host([active]) #led {
-		background-color: var(--md-sys-color-primary);
+		/*background-color: var(--md-sys-color-tertiary);*/
+	}
+	:host([active]) md-list-item {
+		background-color: var(--md-sys-color-surface-container-highest);
 	}
 	[contenteditable]:focus {
 		outline: none;
@@ -28,7 +32,7 @@ export class SubtitleElement extends LitElement {
 
 	// @property({type: Boolean, reflect: true}) active = false
 
-	@query('md-linear-progress') progress!: MdLinearProgress
+	@query('md-linear-progress', true) progress!: MdLinearProgress
 
 	render() {
 		// TODO: remove that when finish debugging or comment
@@ -42,15 +46,25 @@ export class SubtitleElement extends LitElement {
 				<div id="led"></div>
 				<div class="flex-1">
 					<md-list-item>
-						<div slot="start">${this.subtitle?.id ?? NaN}</div>
+						<!-- <div slot="start">${this.subtitle?.id ?? NaN}</div> -->
 						<div slot="overline" class="flex gap-2 opacity-70">
 							<span>${this.startTimecode}</span>-<span
 								>${this.endTimecode}</span
 							>
 						</div>
 						<div slot="headline" contenteditable="true" @input=${this.#onInput}>
-							${this.subtitle?.text ?? 'undefined'}
+							${this.subtitle!.text}
 						</div>
+						<md-icon-button tabindex="-1" slot="end" @click=${() => null}
+							><md-icon>edit</md-icon></md-icon-button
+						>
+						<md-icon-button
+							tabindex="-1"
+							slot="end"
+							@click=${() =>
+								videoUI.playFromTo(this.subtitle!.start, this.subtitle!.end)}
+							><md-icon>play_arrow</md-icon></md-icon-button
+						>
 						<md-icon-button
 							tabindex="-1"
 							slot="end"
@@ -68,7 +82,7 @@ export class SubtitleElement extends LitElement {
 		value ? this.setAttribute('active', '') : this.removeAttribute('active')
 	}
 	get active() {
-		return this.hasAttribute('acive')
+		return this.hasAttribute('active')
 	}
 
 	#onInput = (event: Event) => {
@@ -83,5 +97,13 @@ export class SubtitleElement extends LitElement {
 	}
 	get endTimecode(): Readonly<sub.Timecode> | number {
 		return this.subtitle ? numericTimeToTimecode(this.subtitle.end) : NaN
+	}
+
+	updateProgress(time: sub.NumericTime) {
+		// @TODO: Maybe make this more optimal
+		if (!this.subtitle || !this.progress) return
+		const {start, end} = this.subtitle
+		const duration = end - start
+		this.progress.value = duration > 0 ? (time - start) / duration : 0
 	}
 }

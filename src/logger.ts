@@ -3,6 +3,6 @@ import chalk from 'chalk'
 
 export const logger = new Logger({
 	colors: {
-		log: chalk.bgGreen.black.bold,
+		log: chalk.green,
 	},
 })

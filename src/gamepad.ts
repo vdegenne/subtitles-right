@@ -4,7 +4,7 @@ import {state} from 'lit/decorators.js'
 import {logger} from './logger.js'
 import {store} from './store.js'
 import {videoUI} from './video-element.js'
-import {subtitlesUI} from './subtitles-element.js'
+import {AddSubtitleOptions, subtitlesUI} from './subtitles-element.js'
 import {persistentStore} from './persistentStore.js'
 
 class GamepadController extends ReactiveController {
@@ -25,6 +25,7 @@ class GamepadController extends ReactiveController {
 			gamepad.for(map.LEFT_STICK_LEFT).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						videoUI.rewind()
 						break
 					case Mode.PRIMARY:
 						break
@@ -37,13 +38,15 @@ class GamepadController extends ReactiveController {
 			gamepad.for(map.LEFT_STICK_RIGHT).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						videoUI.fastforward()
 						break
 					case Mode.TERTIARY:
 						break
 				}
 			})
 			gamepad.for(map.RIGHT_BUTTONS_LEFT).before(async ({mode}) => {
-				let subtitle: sub.Subtitle
+				let subtitle: sub.Subtitle | undefined
+				let options: Partial<AddSubtitleOptions> = {activate: true}
 				switch (mode) {
 					case Mode.NORMAL:
 						subtitle = {
@@ -51,7 +54,7 @@ class GamepadController extends ReactiveController {
 							end: videoUI.time + persistentStore.newSubEntryLengthS,
 							text: '',
 						}
-						subtitlesUI.addSubtitle(subtitle)
+						options.allowClinging = true
 						break
 					case Mode.PRIMARY:
 						const last = subtitlesUI.getLastSubtitle()
@@ -71,10 +74,11 @@ class GamepadController extends ReactiveController {
 								text: '',
 							}
 						}
-						subtitlesUI.addSubtitle(subtitle)
-						await subtitlesUI.updateComplete
-						subtitlesUI.activateOnly(subtitle, true)
 						break
+				}
+
+				if (subtitle) {
+					subtitlesUI.addSubtitle(subtitle, options)
 				}
 			})
 
@@ -91,14 +95,6 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
-			gamepad.for(map.RIGHT_BUTTONS_BOTTOM).before(async ({mode}) => {
-				switch (mode) {
-					case Mode.NORMAL:
-						break
-					case Mode.TERTIARY:
-						break
-				}
-			})
 			gamepad.for(map.RIGHT_BUTTONS_RIGHT).before(({mode}) => {
 				if (mode === Mode.NORMAL) {
 				}
@@ -109,12 +105,22 @@ class GamepadController extends ReactiveController {
 					case 'video':
 						switch (mode) {
 							case Mode.NORMAL:
+								if (videoUI.isPlaying()) {
+									videoUI.pause()
+								} else {
+									const active = subtitlesUI.getActiveSubtitle()
+									if (active) {
+										videoUI.playSubtitle(active)
+									} else {
+										videoUI.play()
+									}
+								}
+								break
+							case Mode.PRIMARY:
 								videoUI.togglePlay()
 								break
 						}
 						break
-				}
-				if (mode === Mode.NORMAL) {
 				}
 			})
 			gamepad.for(map.R1).before(({mode}) => {
@@ -129,11 +135,23 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
+			gamepad.for(map.LEFT_BUTTONS_TOP).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						subtitlesUI.activatePrevious()
+						break
+					case Mode.PRIMARY:
+						subtitlesUI.activateFirst()
+						break
+				}
+			})
 			gamepad.for(map.LEFT_BUTTONS_BOTTOM).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						subtitlesUI.activateNext()
 						break
 					case Mode.PRIMARY:
+						subtitlesUI.activateLast()
 						break
 				}
 			})
@@ -141,8 +159,22 @@ class GamepadController extends ReactiveController {
 			gamepad.for(map.LEFT_BUTTONS_LEFT).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						subtitlesUI.subtractStartTime()
 						break
 					case Mode.PRIMARY:
+						subtitlesUI.subtractEndTime()
+						break
+					case Mode.TERTIARY:
+						break
+				}
+			})
+			gamepad.for(map.LEFT_BUTTONS_RIGHT).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						subtitlesUI.addStartTime()
+						break
+					case Mode.PRIMARY:
+						subtitlesUI.addEndTime()
 						break
 					case Mode.TERTIARY:
 						break
@@ -157,6 +189,19 @@ class GamepadController extends ReactiveController {
 						break
 					case Mode.SECONDARY:
 					case Mode.TERTIARY:
+				}
+			})
+			gamepad.for(map.RIGHT_BUTTONS_BOTTOM).before(async ({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						if (videoUI.lookupTime) {
+							videoUI.lookupTime = undefined
+						} else if (videoUI.isPlaying()) {
+							videoUI.pause()
+						}
+						break
+					case Mode.TERTIARY:
+						break
 				}
 			})
 

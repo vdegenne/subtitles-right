@@ -1,9 +1,10 @@
-import {type PropertyValues} from 'snar'
-import {toast} from 'toastit'
+// import {type PropertyValues} from 'snar'
+// import {toast} from 'toastit'
 
 export function copyToClipboard(text: string) {
 	navigator.clipboard.writeText(text)
-	toast('Copied to clipboard.')
+	// TODO: be careful activating that if you share utils with server.
+	// toast('Copied to clipboard.')
 }
 
 export function sleep(milli: number = 1000) {
@@ -140,14 +141,14 @@ export async function loadDataFromFile(): Promise<string> {
 	})
 }
 
-export function propertyValuesToJson<T>(
-	changed: PropertyValues<T>,
-	object: T,
-): Partial<T> {
-	return Object.fromEntries(
-		[...changed.keys()].map((key) => [key, object[key as keyof typeof object]]),
-	) as Partial<T>
-}
+// export function propertyValuesToJson<T>(
+// 	changed: PropertyValues<T>,
+// 	object: T,
+// ): Partial<T> {
+// 	return Object.fromEntries(
+// 		[...changed.keys()].map((key) => [key, object[key as keyof typeof object]]),
+// 	) as Partial<T>
+// }
 
 export function changeStyleProperty(cssVar: string, value: number | string) {
 	document.documentElement.style.setProperty(`--${cssVar}`, value + '')
@@ -189,4 +190,9 @@ export function numericTimeToTimeCode(time: number) {
 		'.' +
 		String(milliseconds).padStart(3, '0')
 	)
+}
+
+export function roundFloat(value: number, decimals: number): number {
+	const factor = 10 ** decimals
+	return Math.round(value * factor) / factor
 }

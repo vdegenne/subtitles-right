@@ -1,9 +1,8 @@
-import {PropertyValues, ReactiveController, state} from '@snar/lit'
+import {ReactiveController, state} from '@snar/lit'
 import {Logger} from '@vdegenne/debug'
 import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
 import chalk from 'chalk'
 import {saveToLocalStorage} from 'snar-save-to-local-storage'
-import {availablePages, Page} from './pages/index.js'
 
 const logger = new Logger({
 	colors: {
@@ -26,9 +25,17 @@ export class AppStore extends ReactiveController {
 	 */
 	@state() newSubEntryOffsetS = 0.1 // 100ms
 
+	@state() subtractTime = 0.1
+	@state() addTime = 0.1
+
+	/**
+	 * When subtracting or adding time to the subtitle's end time, how long should the replay be.
+	 */
+	@state() subEndTimeReplayLengthS = 0.5
+
 	F = new FormBuilder(this)
 
-	protected updated(changed: PropertyValues<this>) {}
+	// protected updated(changed: PropertyValues<this>) {}
 }
 
 export const persistentStore = new AppStore()

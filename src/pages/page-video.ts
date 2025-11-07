@@ -24,7 +24,7 @@ export class PageVideo extends PageElement {
 		return html`<!-- -->
 			<div class="flex">
 				<div
-					style="width:var(--video-container-width);background-color:var(--md-sys-color-surface-container);"
+					style="width:var(--video-container-width);/*background-color:var(--md-sys-color-surface-container);*/"
 				>
 					${videoUI}
 				</div>

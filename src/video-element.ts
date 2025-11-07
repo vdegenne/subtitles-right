@@ -1,8 +1,9 @@
+import {getElement, cquerySelector} from 'html-vision'
 import {guard} from 'lit/directives/guard.js'
 import {MdLinearProgress} from '@material/web/progress/linear-progress.js'
 import {withController} from '@snar/lit'
 import {numericTimeToTimecode, subtitlesToVTT} from '@vdegenne/subtitles'
-import {css, html, LitElement} from 'lit'
+import {css, html, LitElement, PropertyValues} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement, query, state} from 'lit/decorators.js'
 import {until} from 'lit/directives/until.js'
@@ -27,6 +28,7 @@ MdLinearProgress.elementStyles.push(css`
 		width: var(--video-container-width);
 	}
 	video {
+		display: block;
 		width: 100%;
 	}
 	md-linear-progress {
@@ -49,9 +51,23 @@ class VideoElement extends LitElement {
 	// TODO: change this to @state
 	#playing = false
 
-	@query('video') video?: HTMLVideoElement
+	/**
+	 * Will be set by `playFromTo()` to end the video at a certain time.
+	 * Use `cancelPlayFromTo()` to cancel it.
+	 */
+	@state() lookupTime: number | undefined
+
+	// @query('video') #videoElement?: HTMLVideoElement
+	#videoElement: HTMLVideoElement | undefined
 	@query('md-linear-progress') progress!: MdLinearProgress
 	@query('#feed') feed!: HTMLDivElement
+
+	#renderVideoElementCompleteWithResolvers:
+		| PromiseWithResolvers<HTMLVideoElement>
+		| undefined
+	get renderVideoElementComplete() {
+		return this.#renderVideoElementCompleteWithResolvers?.promise
+	}
 
 	render() {
 		logger.log('RENDER')
@@ -61,12 +77,15 @@ class VideoElement extends LitElement {
 			)}
 			${this.hasVideo
 				? html`<!-- -->
-						<div ?hidden=${!this.hasVideo}>
-							<md-linear-progress
-								@click=${this.#onProgressClick}
-								class="cursor-pointer"
-							></md-linear-progress>
+						<md-linear-progress
+							@click=${this.#onProgressClick}
+							class="cursor-pointer"
+						></md-linear-progress>
+						<div class="flex items-center justify-between m-2">
 							<div id="feed"></div>
+							<md-filled-tonal-icon-button ?invisible=${!this.lookupTime}>
+								<md-icon>timer</md-icon>
+							</md-filled-tonal-icon-button>
 						</div>
 						<!-- -->`
 				: null}
@@ -74,6 +93,8 @@ class VideoElement extends LitElement {
 	}
 
 	async #renderVideoElement() {
+		const {resolve, reject} = (this.#renderVideoElementCompleteWithResolvers =
+			Promise.withResolvers<HTMLVideoElement>())
 		logger.log('Render guarded video element')
 		this.hasVideo = false
 		// TODO: need to guard that (store.videoPath)
@@ -85,6 +106,8 @@ class VideoElement extends LitElement {
 		)
 		if (!ok) {
 			this.hasVideo = false
+			this.#videoElement = undefined
+			reject()
 			return html`<!-- -->
 				<div class="m-5">
 					<p>Video couldn't be found for this project.</p>
@@ -107,6 +130,15 @@ class VideoElement extends LitElement {
 		}
 
 		this.hasVideo = true
+		// TODO: This looks shady but should work for now
+		new Promise((r) => requestAnimationFrame(r)).then(async () => {
+			try {
+				this.#videoElement = await getElement('video', {timeoutMs: 1000})
+				resolve(this.#videoElement)
+			} catch {
+				reject()
+			}
+		})
 		return html`<!-- -->
 			<video
 				src="/api/${await text()}"
@@ -123,21 +155,30 @@ class VideoElement extends LitElement {
 	}
 
 	get timecode(): sub.Timecode {
-		return numericTimeToTimecode(this.video!.currentTime)
+		return numericTimeToTimecode(this.#videoElement!.currentTime)
 	}
 	get time(): sub.NumericTime {
-		return this.video!.currentTime
+		return this.#videoElement!.currentTime
+	}
+
+	isPlaying() {
+		return !!(
+			this.#videoElement!.currentTime > 0 &&
+			!this.#videoElement!.paused &&
+			!this.#videoElement!.ended &&
+			this.#videoElement!.readyState > 2
+		)
 	}
 
 	play() {
-		this.video!.play()
+		this.#videoElement!.play()
 	}
 	pause() {
-		this.video!.pause()
+		this.#videoElement!.pause()
 	}
 
 	togglePlay() {
-		if (this.video!.paused) {
+		if (this.#videoElement!.paused) {
 			this.play()
 		} else {
 			this.pause()
@@ -146,7 +187,6 @@ class VideoElement extends LitElement {
 
 	#startTimeUpdate = () => {
 		this.#playing = true
-		console.log(this.video)
 		const loop = async () => {
 			await this.#onTimeUpdate()
 			if (this.#playing) {
@@ -154,42 +194,59 @@ class VideoElement extends LitElement {
 			}
 		}
 		loop()
-		// if (this.rafId == null) loop()
 	}
 
 	#stopTimeUpdate = () => {
-		this.#playing = false
-		// if (this.rafId != null) {
-		// 	cancelAnimationFrame(this.rafId)
-		// 	this.rafId = null
-		// }
+		// TODO: Defering to solve unupdated views when the video pauses suddenly.
+		// remove the timeout if something is wrong.
+		setTimeout(() => {
+			this.#playing = false
+		}, 200)
 	}
 
 	async #onTimeUpdate() {
 		this.feed && (this.feed.textContent = this.timecode)
-		await sleep(100)
+		// Stop the video if there were a lookup
+		if (this.lookupTime && this.time > this.lookupTime) {
+			this.pause()
+			// await sleep(80)
+			this.seek(this.lookupTime, false)
+			this.lookupTime = undefined
+		}
+		await sleep(90)
 	}
 
-	#onSlowTimeUpdate = () => {
+	#onSlowTimeUpdate = (e: Event) => {
 		this.#updateProgress()
+		subtitlesUI.updateProgresses(this.time)
+		// Experimental: follow subtitles if not in lookup mode
+		if (!this.lookupTime) {
+			subtitlesUI.activateSubtitleFromTime(this.time, false)
+		}
 	}
 
 	#updateProgress() {
-		this.progress.value = this.video!.currentTime / this.video!.duration
+		this.progress.value =
+			this.#videoElement!.currentTime / this.#videoElement!.duration
 	}
 
 	#onProgressClick(event: PointerEvent) {
 		const progress = event.target as MdLinearProgress
 		const rect = progress.getBoundingClientRect()
 		const ratio = (event.clientX - rect.left) / rect.width
-		this.seek(ratio * this.video!.duration, true)
+		this.seek(ratio * this.#videoElement!.duration, true)
+		this.#onTimeUpdate() // update feedback time
 	}
 
-	seek(time: sub.NumericTime, activateSubtitle = true) {
-		this.video!.currentTime = time
+	seek(time: sub.NumericTime, activateSubtitle = true, clearLookupTime = true) {
+		this.#videoElement!.currentTime = time
 		if (activateSubtitle) {
 			subtitlesUI.activateSubtitleFromTime(time, false)
 		}
+		if (clearLookupTime) {
+			this.lookupTime = undefined
+		}
+		this.#onTimeUpdate()
 	}
 
 	loadSubtitles(subtitles: sub.Subtitles) {
@@ -200,7 +257,7 @@ class VideoElement extends LitElement {
 		const url = URL.createObjectURL(blob)
 
 		// Remove existing text tracks if needed
-		Array.from(this.video!.textTracks).forEach((track) => {
+		Array.from(this.#videoElement!.textTracks).forEach((track) => {
 			track.mode = 'disabled'
 		})
 
@@ -212,10 +269,25 @@ class VideoElement extends LitElement {
 		trackEl.src = url
 		trackEl.default = true
 
-		this.video!.appendChild(trackEl)
+		this.#videoElement!.appendChild(trackEl)
 	}
 
-	playSubtitle(subtitle: sub.Subtitle) {}
+	playFromTo(start: sub.NumericTime, end: sub.NumericTime) {
+		this.lookupTime = end
+		this.seek(start, false)
+		this.play()
+	}
+
+	playSubtitle(subtitle: sub.Subtitle) {
+		this.playFromTo(subtitle.start, subtitle.end)
+	}
+
+	rewind(stepS = 1) {
+		this.#videoElement!.currentTime -= stepS
+	}
+	fastforward(stepS = 1) {
+		this.#videoElement!.currentTime += stepS
+	}
 }
 
 export type {VideoElement}
