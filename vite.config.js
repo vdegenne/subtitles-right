@@ -136,16 +136,25 @@ export default defineConfig({
 		port: 5193,
 		proxy: {
 			'/api': `http://localhost:${PORT}`,
-			// '/data': {
-			// 	target: 'http://localhost:5173', // Vite's default dev server address
+			// '/data': `http://localhost:${PORT}`,
+			// '/data/': {
+			// 	target: `http://localhost:${PORT}`, // Vite's default dev server address
 			// 	changeOrigin: true,
-			// 	rewrite: (path) => path.replace(/^\/data/, '/dist/data'),
+			// 	rewrite: (path) => {
+			// 		console.log('FILE', path) // test
+			// 		const rewrite = path.replace(/^\/data/, '/dist/data')
+			// 		console.log(rewrite)
+			// 		return rewrite
+			// 	},
 			// },
 		},
 		// https: {
 		// 	key: fs.readFileSync('./ssl/server.key'),
 		// 	cert: fs.readFileSync('./ssl/server.crt'),
 		// },
+		watch: {
+			ignored: ['**/dist/data/**'], // ignore all files in dist/data
+		},
 	},
 	build: {
 		// outDir: 'docs',

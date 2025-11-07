@@ -1,8 +1,10 @@
 node_modules
 .wireit
-dist/**
-!dist/data
-!dist/data/**
+dist/
+!dist/data/
+dist/data/**/*.mp4
+dist/data/**/*.webm
+dist/data/**/*.mkv
 lib
 public/material-symbols.woff2
 src/styles/stylesheets/symbols.css

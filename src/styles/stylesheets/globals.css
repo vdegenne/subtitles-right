@@ -3,6 +3,8 @@
 	--md-list-container-color: transparent;
 	-webkit-tap-highlight-color: transparent;
 	--md-elevation-level: 2;
+
+	--video-container-width: 1000px;
 }
 
 body {

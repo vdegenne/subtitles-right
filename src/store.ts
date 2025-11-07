@@ -1,69 +1,43 @@
-import {explode} from '@vdegenne/path'
 import {PropertyValues, ReactiveController, state} from '@snar/lit'
 import {Logger} from '@vdegenne/debug'
 import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
 import chalk from 'chalk'
-import {saveToLocalStorage} from 'snar-save-to-local-storage'
-import toast from 'toastit'
-import {api} from './api.js'
+// import { saveToLocalStorage } from 'snar-save-to-local-storage'
 import {availablePages, Page} from './pages/index.js'
-import {trim} from './utils.js'
 
 const logger = new Logger({
-	color: chalk.blueBright,
-	errorColor: chalk.red,
+	colors: {
+		log: chalk.grey,
+	},
 })
 
-@saveToLocalStorage('subtitles-right:store')
+/**
+ * videoPath and page are set by the router on url change (when the page reloads also)
+ * so it doesn't really need to be save in the localstorage and it's fine this way.
+ * Better create a new store for persistent values only.
+ */
+// @saveToLocalStorage('subtitles-right:store')
 export class AppStore extends ReactiveController {
+	@state() videoPath: string | undefined
+	@state() page: Page = 'main'
+
 	F = new FormBuilder(this)
 
-	@state() page: Page = 'main'
-	@state() fs: ProjectFSItem[] = []
-	@state() currentPath = ''
-
-	constructor() {
-		super()
-		this.loadFS()
-	}
-
 	protected updated(changed: PropertyValues<this>) {
-		logger.log('UPDATED called')
-		logger.log(`fspath: ${this.currentPath}`)
+		// TODO: if the page is a video, we can load information about it.
 		if (changed.has('page')) {
 			const page = availablePages.includes(this.page) ? this.page : '404'
-			import(`./pages/page-${page}.ts`)
-				.then(() => {
-					console.log(`Page ${page} loaded.`)
-				})
-				.catch(() => {})
+			if (!customElements.get(`page-${page}`)) {
+				import(`./pages/page-${page}.ts`)
+					.then(() => {
+						logger.log(`Page ${page} loaded.`)
+					})
+					.catch(() => {})
+			}
 		}
-	}
-
-	async loadFS() {
-		const {ok, json} = await api.get('/fs')
-		if (!ok) {
-			const errMsg = 'Something went wrong when fetching the fs'
-			logger.error(errMsg)
-			toast(errMsg)
-			return (this.fs = [])
-		}
-		return (this.fs = await json())
-	}
-
-	getCurrentFSItems() {
-		console.log('debug')
-		const currentPath = trim(this.currentPath, '/')
-		const pathParts = explode(currentPath)
-		console.log(pathParts)
-		const pathLength = pathParts.length
-		const items = this.fs.filter((i) => {
-			const parts = i.path.split(/\/+/)
-			return parts.length === pathLength + 1 && i.path.startsWith(currentPath)
-		})
-		// console.log(currentPath, pathLength)
-		return items
 	}
 }
 
 export const store = new AppStore()
+// @ts-ignore
+window.store = store

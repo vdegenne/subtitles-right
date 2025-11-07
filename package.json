@@ -17,12 +17,15 @@
 		"@vdegenne/about-dialog": "^0.4.2",
 		"@vdegenne/debouncer": "^1.0.9",
 		"@vdegenne/forms": "^0.1.56",
-		"@vdegenne/koa": "^0.1.31",
 		"@vdegenne/material-color-helpers": "^1.11.7",
+		"@vdegenne/mini-gamepad": "file:../mini-gamepad",
 		"@vdegenne/mini-rest": "^0.3.2",
-		"@vdegenne/path": "^0.1.5",
+		"@vdegenne/path": "^0.1.6",
 		"@vdegenne/rollup-plugin-minify-html": "^1.0.6",
-		"@vdegenne/router": "file:../router",
+		"@vdegenne/router": "^0.1.7",
+		"@vdegenne/subtitles": "file:../subtitles",
+		"@vdegenne/youtube": "^0.1.5",
+		"chalk": "^5.6.2",
 		"custom-element-decorator": "^0.6.0",
 		"html-vision": "^0.3.7",
 		"lit": "^3.3.1",
@@ -37,14 +40,16 @@
 		"tailwindcss": "^4.1.16",
 		"toastit": "^2.2.2",
 		"typescript": "^5.9.3",
-		"vite": "^7.1.12",
+		"vite": "^7.2.0",
 		"vite-plugin-mdicon2svg": "^0.2.3",
 		"vscode-ui-connector": "^0.2.4",
+		"wavy-text-element": "file:../wavy-text-element",
 		"wireit": "^0.14.12"
 	},
 	"scripts": {
 		"dev": "wireit",
-		"build": "wireit"
+		"build": "wireit",
+		"build:server": "wireit"
 	},
 	"wireit": {
 		"dev": {
@@ -58,7 +63,9 @@
 			"command": "vite --host",
 			"dependencies": [
 				"vuc",
-				"../router:build"
+				"../router:build",
+				"../mini-gamepad:build",
+				"../wavy-text-element:build"
 			]
 		},
 		"build": {
@@ -74,11 +81,17 @@
 				"./index.html",
 				"./public"
 			],
-			"output": []
+			"output": [
+				"./dist/**/*",
+				"!./dist/data/"
+			]
 		},
 		"build:server": {
 			"command": "tsc --pretty -p ./tsconfig.server.json",
 			"clean": "if-file-deleted",
+			"dependencies": [
+				"../koa:build"
+			],
 			"files": [
 				"./tsconfig.server.json",
 				"./src/server/**/*.ts"
@@ -104,7 +117,7 @@
 		}
 	},
 	"dependencies": {
-		"@vdegenne/debug": "^0.1.22",
-		"chalk": "^5.6.2"
+		"@vdegenne/debug": "^0.1.30",
+		"@vdegenne/koa": "file:../koa"
 	}
 }

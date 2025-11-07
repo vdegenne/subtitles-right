@@ -1,8 +1,8 @@
-import {css, LitElement, PropertyValues} from 'lit';
-import {property} from 'lit/decorators.js';
+import {css, LitElement, PropertyValues} from 'lit'
+import {property} from 'lit/decorators.js'
 
 export class PageElement extends LitElement {
-	@property({type: Boolean, reflect: true}) active = false;
+	@property({type: Boolean, reflect: true}) active = false
 
 	static styles = css`
 		:host {
@@ -13,9 +13,9 @@ export class PageElement extends LitElement {
 		:host(:not([active])) {
 			display: none;
 		}
-	`;
+	`
 
 	protected shouldUpdate(_changedProperties: PropertyValues): boolean {
-		return this.active;
+		return this.active
 	}
 }

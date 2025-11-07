@@ -76,13 +76,10 @@ export async function getElementInTree(
 	}
 }
 
-/**
- * Shuffle the array in place.
- */
 export function shuffleArray<T>(array: T[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
-		;[array[i], array[j]] = [array[j], array[i]] // Swap elements
+		;[array[i]!, array[j]!] = [array[j]!, array[i]!]
 	}
 }
 
@@ -175,4 +172,21 @@ export async function loadImage(url: string): Promise<HTMLImageElement> {
 export function trim(input: string, char = ' '): string {
 	const regex = new RegExp(`^${char}+|${char}+$`, 'g')
 	return input.replace(regex, '')
+}
+
+export function numericTimeToTimeCode(time: number) {
+	const hours = Math.floor(time / 3600)
+	const minutes = Math.floor((time % 3600) / 60)
+	const seconds = Math.floor(time % 60)
+	const milliseconds = Math.floor((time * 1000) % 1000)
+
+	return (
+		String(hours).padStart(2, '0') +
+		':' +
+		String(minutes).padStart(2, '0') +
+		':' +
+		String(seconds).padStart(2, '0') +
+		'.' +
+		String(milliseconds).padStart(3, '0')
+	)
 }

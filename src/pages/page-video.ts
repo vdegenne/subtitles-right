@@ -4,6 +4,8 @@ import {withStyles} from 'lit-with-styles'
 import {customElement} from 'lit/decorators.js'
 import {store} from '../store.js'
 import {PageElement} from './PageElement.js'
+import {videoUI} from '../video-element.js'
+import {subtitlesUI} from '../subtitles-element.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -19,7 +21,16 @@ declare global {
 `)
 export class PageVideo extends PageElement {
 	render() {
-		return html`Video page`
+		return html`<!-- -->
+			<div class="flex">
+				<div
+					style="width:var(--video-container-width);background-color:var(--md-sys-color-surface-container);"
+				>
+					${videoUI}
+				</div>
+				<div class="flex-1">${subtitlesUI}</div>
+			</div>
+			<!-- -->`
 	}
 }
 

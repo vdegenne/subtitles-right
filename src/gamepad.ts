@@ -1,6 +1,11 @@
 import {ReactiveController} from '@snar/lit'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
+import {logger} from './logger.js'
+import {store} from './store.js'
+import {videoUI} from './video-element.js'
+import {subtitlesUI} from './subtitles-element.js'
+import {persistentStore} from './persistentStore.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined
@@ -10,6 +15,8 @@ class GamepadController extends ReactiveController {
 		const minigp = new MiniGamepad({
 			// pollSleepMs: 900,
 			focusDeadTimeMs: 200,
+			debug: true,
+			logger,
 		})
 		minigp.onConnect((gamepad) => {
 			this.gamepad = gamepad
@@ -35,9 +42,38 @@ class GamepadController extends ReactiveController {
 						break
 				}
 			})
-			gamepad.for(map.RIGHT_BUTTONS_LEFT).before(({mode}) => {
+			gamepad.for(map.RIGHT_BUTTONS_LEFT).before(async ({mode}) => {
+				let subtitle: sub.Subtitle
 				switch (mode) {
 					case Mode.NORMAL:
+						subtitle = {
+							start: videoUI.time,
+							end: videoUI.time + persistentStore.newSubEntryLengthS,
+							text: '',
+						}
+						subtitlesUI.addSubtitle(subtitle)
+						break
+					case Mode.PRIMARY:
+						const last = subtitlesUI.getLastSubtitle()
+						if (last) {
+							subtitle = {
+								start: last.end + persistentStore.newSubEntryOffsetS,
+								end:
+									last.end +
+									persistentStore.newSubEntryOffsetS +
+									persistentStore.newSubEntryLengthS,
+								text: '',
+							}
+						} else {
+							subtitle = {
+								start: videoUI.time,
+								end: videoUI.time + persistentStore.newSubEntryLengthS,
+								text: '',
+							}
+						}
+						subtitlesUI.addSubtitle(subtitle)
+						await subtitlesUI.updateComplete
+						subtitlesUI.activateOnly(subtitle, true)
 						break
 				}
 			})
@@ -69,6 +105,15 @@ class GamepadController extends ReactiveController {
 			})
 
 			gamepad.for(map.L1).before(({mode}) => {
+				switch (store.page) {
+					case 'video':
+						switch (mode) {
+							case Mode.NORMAL:
+								videoUI.togglePlay()
+								break
+						}
+						break
+				}
 				if (mode === Mode.NORMAL) {
 				}
 			})
