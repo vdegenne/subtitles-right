@@ -1,7 +1,8 @@
 node_modules
 .wireit
-dist/
+dist/**
 !dist/data/
+!dist/data/**
 dist/data/**/*.mp4
 dist/data/**/*.webm
 dist/data/**/*.mkv
