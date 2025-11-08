@@ -222,6 +222,23 @@ class GamepadController extends ReactiveController {
 						break
 				}
 			})
+
+			gamepad.for(map.LEFT_STICK_PRESS).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						// undefined to apply on the active subtitle if any
+						subtitlesUI.setStartTime(videoUI.time, undefined, true)
+						break
+				}
+			})
+			gamepad.for(map.RIGHT_STICK_PRESS).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						// undefined to apply on the active subtitle if any
+						subtitlesUI.setEndTime(videoUI.time, undefined, false)
+						break
+				}
+			})
 		})
 	}
 }
