@@ -322,10 +322,7 @@ class SubtitlesElement extends LitElement {
 			const index = this.subtitles.indexOf(subtitle)
 			this.subtitleElements[index]!.requestUpdate()
 			if (seek) {
-				videoUI.playFromTo(
-					subtitle.end - persistentStore.subEndTimeReplayLengthS,
-					subtitle.end,
-				)
+				videoUI.playSubtitle(subtitle)
 			}
 			this.save()
 		}
