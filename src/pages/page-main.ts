@@ -39,6 +39,9 @@ export class PageMain extends PageElement {
 					>
 					<div slot="headline">${fs.current}</div>
 					<div slot="end" class="flex items-center gap-1">
+						<md-icon-button @click=${() => fs.openTerminal()}
+							><md-icon>terminal</md-icon></md-icon-button
+						>
 						<md-icon-button @click=${() => fs.openDirectory()}
 							><md-icon>folder_open</md-icon></md-icon-button
 						>

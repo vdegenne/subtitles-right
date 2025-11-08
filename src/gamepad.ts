@@ -105,7 +105,7 @@ class GamepadController extends ReactiveController {
 					case 'video':
 						switch (mode) {
 							case Mode.NORMAL:
-								if (videoUI.isPlaying()) {
+								if (videoUI.isPlaying() && videoUI.lookupTime) {
 									videoUI.pause()
 								} else {
 									const active = subtitlesUI.getActiveSubtitle()
@@ -117,7 +117,14 @@ class GamepadController extends ReactiveController {
 								}
 								break
 							case Mode.PRIMARY:
-								videoUI.togglePlay()
+								if (videoUI.isPlaying() && videoUI.lookupTime) {
+									videoUI.lookupTime = undefined
+								} else if (!videoUI.isPlaying() && videoUI.lookupTime) {
+									videoUI.lookupTime = undefined
+									videoUI.play()
+								} else {
+									videoUI.togglePlay()
+								}
 								break
 						}
 						break
@@ -138,9 +145,11 @@ class GamepadController extends ReactiveController {
 			gamepad.for(map.LEFT_BUTTONS_TOP).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						videoUI.pause()
 						subtitlesUI.activatePrevious()
 						break
 					case Mode.PRIMARY:
+						videoUI.pause()
 						subtitlesUI.activateFirst()
 						break
 				}
@@ -148,9 +157,11 @@ class GamepadController extends ReactiveController {
 			gamepad.for(map.LEFT_BUTTONS_BOTTOM).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						videoUI.pause()
 						subtitlesUI.activateNext()
 						break
 					case Mode.PRIMARY:
+						videoUI.pause()
 						subtitlesUI.activateLast()
 						break
 				}

@@ -171,10 +171,10 @@ class SubtitlesElement extends LitElement {
 			const {previous, next} = this.getSurroundingSubtitlesFromTime(
 				subtitle.start,
 			)
-			if (previous) {
+			if (previous && subtitle.start <= previous.end) {
 				subtitle.start = previous.end + persistentStore.newSubEntryOffsetS
 			}
-			if (next) {
+			if (next && subtitle.end >= next.start) {
 				subtitle.end = next.start - persistentStore.newSubEntryOffsetS
 				if (subtitle.end <= subtitle.start) {
 					subtitle.end = subtitle.start + persistentStore.newSubEntryOffsetS
@@ -192,7 +192,7 @@ class SubtitlesElement extends LitElement {
 				subtitlesUI.activateOnly(subtitle, _opts.seekVideoOnActivation)
 			})
 		}
-		// this.save()
+		this.save()
 	}
 
 	injectSubtitles() {
@@ -391,6 +391,8 @@ class SubtitlesElement extends LitElement {
 			this.save()
 		}
 	}
+
+	setStartTime(subtitle?: sub.Subtitle) {}
 }
 
 export const subtitlesUI = new SubtitlesElement()

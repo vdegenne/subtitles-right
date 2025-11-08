@@ -46,6 +46,9 @@
 		"wavy-text-element": "file:../wavy-text-element",
 		"wireit": "^0.14.12"
 	},
+	"bin": {
+		"make-vtt": "./lib/make-vtt.js"
+	},
 	"scripts": {
 		"dev": "wireit",
 		"build": "wireit",

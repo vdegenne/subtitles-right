@@ -220,7 +220,8 @@ class VideoElement extends LitElement {
 		this.#updateProgress()
 		subtitlesUI.updateProgresses(this.time)
 		// Experimental: follow subtitles if not in lookup mode
-		if (!this.lookupTime) {
+		// TODO: make it as an option to avoid draining perfs
+		if (this.isPlaying() && !this.lookupTime) {
 			subtitlesUI.activateSubtitleFromTime(this.time, false)
 		}
 	}
@@ -274,7 +275,7 @@ class VideoElement extends LitElement {
 
 	playFromTo(start: sub.NumericTime, end: sub.NumericTime) {
 		this.lookupTime = end
-		this.seek(start, false)
+		this.seek(start, false, false)
 		this.play()
 	}
 
