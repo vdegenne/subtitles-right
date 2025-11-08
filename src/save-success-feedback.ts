@@ -10,6 +10,7 @@ import {customElement, property, state} from 'lit/decorators.js'
 		right: 12px;
 		opacity: 0;
 		transition: opacity 0.6s linear;
+		pointer-events: none;
 	}
 	:host([display]) {
 		display: block;

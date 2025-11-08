@@ -235,7 +235,7 @@ class GamepadController extends ReactiveController {
 				switch (mode) {
 					case Mode.NORMAL:
 						// undefined to apply on the active subtitle if any
-						subtitlesUI.setEndTime(videoUI.time, undefined, false)
+						subtitlesUI.setEndTime(videoUI.time, undefined, true)
 						break
 				}
 			})

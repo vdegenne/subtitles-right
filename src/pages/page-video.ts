@@ -28,7 +28,7 @@ export class PageVideo extends PageElement {
 				>
 					${videoUI}
 				</div>
-				<div class="flex-1">${subtitlesUI}</div>
+				<div class="flex-1 pb-24">${subtitlesUI}</div>
 			</div>
 			<!-- -->`
 	}
