@@ -315,6 +315,37 @@ class SubtitlesElement extends LitElement {
 		// }
 	}
 
+	setStartTime(time: sub.NumericTime, subtitle?: sub.Subtitle, seek = true) {
+		subtitle ??= this.getActiveSubtitle()
+		if (subtitle) {
+			subtitle.start = time
+			const index = this.subtitles.indexOf(subtitle)
+			this.subtitleElements[index]!.requestUpdate()
+			if (seek) {
+				videoUI.playFromTo(
+					subtitle.end - persistentStore.subEndTimeReplayLengthS,
+					subtitle.end,
+				)
+			}
+			this.save()
+		}
+	}
+	setEndTime(time: sub.NumericTime, subtitle?: sub.Subtitle, seek = true) {
+		subtitle ??= this.getActiveSubtitle()
+		if (subtitle) {
+			subtitle.end = time
+			const index = this.subtitles.indexOf(subtitle)
+			this.subtitleElements[index]!.requestUpdate()
+			if (seek) {
+				videoUI.playFromTo(
+					subtitle.end - persistentStore.subEndTimeReplayLengthS,
+					subtitle.end,
+				)
+			}
+			this.save()
+		}
+	}
+
 	/**
 	 * Will subtract time from the given (or the active one if not provided) subtitle's start numeric time
 	 */
@@ -391,8 +422,6 @@ class SubtitlesElement extends LitElement {
 			this.save()
 		}
 	}
-
-	setStartTime(subtitle?: sub.Subtitle) {}
 }
 
 export const subtitlesUI = new SubtitlesElement()
