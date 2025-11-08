@@ -44,6 +44,7 @@ class GamepadController extends ReactiveController {
 						break
 				}
 			})
+			// X
 			gamepad.for(map.RIGHT_BUTTONS_LEFT).before(async ({mode}) => {
 				let subtitle: sub.Subtitle | undefined
 				let options: Partial<AddSubtitleOptions> = {activate: true}
@@ -107,6 +108,8 @@ class GamepadController extends ReactiveController {
 							case Mode.NORMAL:
 								if (videoUI.isPlaying() && videoUI.lookupTime) {
 									videoUI.pause()
+								} else if (!videoUI.isPlaying() && videoUI.lookupTime) {
+									videoUI.play()
 								} else {
 									const active = subtitlesUI.getActiveSubtitle()
 									if (active) {
@@ -124,6 +127,15 @@ class GamepadController extends ReactiveController {
 									videoUI.play()
 								} else {
 									videoUI.togglePlay()
+								}
+								break
+
+							case Mode.SECONDARY:
+								const active = subtitlesUI.getActiveSubtitle()
+								if (active) {
+									videoUI.playSubtitle(active)
+								} else {
+									// videoUI.play()
 								}
 								break
 						}
@@ -167,6 +179,7 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
+			// DPAD_LEFT
 			gamepad.for(map.LEFT_BUTTONS_LEFT).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
@@ -179,6 +192,7 @@ class GamepadController extends ReactiveController {
 						break
 				}
 			})
+			// DPAD_RIGHT
 			gamepad.for(map.LEFT_BUTTONS_RIGHT).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:

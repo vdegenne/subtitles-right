@@ -55,9 +55,14 @@ class SubtitlesElement extends LitElement {
 			${repeat(
 				this.subtitles,
 				(s) => s.id,
-				(s) => {
+				(s, i) => {
 					return html`<!-- -->
-						<subtitle-element .subtitle=${s}></subtitle-element>
+						<div class="relative">
+							<span
+								class="absolute top-0 left-1 text-[var(--md-sys-color-primary)] opacity-50"
+								>${i}</span
+							><subtitle-element .subtitle=${s}></subtitle-element>
+						</div>
 						<!-- -->`
 				},
 			)}
@@ -107,8 +112,9 @@ class SubtitlesElement extends LitElement {
 	}
 
 	getNextId() {
+		console.log('what')
 		const ids = this.subtitles.map((s) => s.id)
-		ids.sort()
+		ids.sort((a, b) => a! - b!)
 		if (ids.length === 0) {
 			return 0
 		}
@@ -211,13 +217,15 @@ class SubtitlesElement extends LitElement {
 		return
 	}
 	save() {
+		return
 		this.injectSubtitles()
 		return this.#saveDebouncer.call()
 	}
 
-	async deleteSubtitle(subtitle: sub.Subtitle) {
+	deleteSubtitle(subtitle: sub.Subtitle) {
 		this.subtitles = this.subtitles.filter((s) => s.id !== subtitle.id)
-		await this.save()
+		console.log(this.subtitles)
+		this.save()
 	}
 
 	async activateOnly(subtitle: sub.Subtitle, seek = true) {
@@ -331,6 +339,7 @@ class SubtitlesElement extends LitElement {
 		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
 			subtitle.end = time
+			// TODO: We should make sure the video lookup time is updated to avoid over play
 			const index = this.subtitles.indexOf(subtitle)
 			this.subtitleElements[index]!.requestUpdate()
 			if (seek) {
@@ -363,7 +372,7 @@ class SubtitlesElement extends LitElement {
 		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
 			this.setStartTime(
-				subtitle.start - persistentStore.addTime,
+				subtitle.start + persistentStore.addTime,
 				subtitle,
 				seek,
 			)
@@ -375,7 +384,7 @@ class SubtitlesElement extends LitElement {
 	subtractEndTime(subtitle?: sub.Subtitle, seek = true) {
 		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
-			this.setStartTime(
+			this.setEndTime(
 				subtitle.end - persistentStore.subtractTime,
 				subtitle,
 				seek,

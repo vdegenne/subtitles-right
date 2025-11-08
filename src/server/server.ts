@@ -123,6 +123,7 @@ config<SubtitlesRightAPI>({
 			if (!Array.isArray(subtitles)) {
 				ctx.throw(400, 'Body needs to be an array of subtitles')
 			}
+			console.log(subtitles)
 			try {
 				saveSubtitles(params.path!, subtitles)
 			} catch (err) {
