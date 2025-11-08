@@ -350,76 +350,48 @@ class SubtitlesElement extends LitElement {
 	 * Will subtract time from the given (or the active one if not provided) subtitle's start numeric time
 	 */
 	subtractStartTime(subtitle?: sub.Subtitle, seek = true) {
-		if (!subtitle) {
-			subtitle = this.getActiveSubtitle()
-		}
+		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
-			subtitle.start -= persistentStore.subtractTime
-			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
-			if (seek) {
-				// videoUI.seek(subtitle.start)
-				videoUI.playSubtitle(subtitle)
-			}
-			this.save()
+			this.setStartTime(
+				subtitle.start - persistentStore.subtractTime,
+				subtitle,
+				seek,
+			)
 		}
 	}
 	/**
 	 * Will add time from the given (or the active one if not provided) subtitle's start numeric time
 	 */
 	addStartTime(subtitle?: sub.Subtitle, seek = true) {
-		if (!subtitle) {
-			subtitle = this.getActiveSubtitle()
-		}
+		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
-			subtitle.start += persistentStore.subtractTime
-			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
-			if (seek) {
-				// videoUI.seek(subtitle.start)
-				videoUI.playSubtitle(subtitle)
-			}
-			this.save()
+			this.setStartTime(
+				subtitle.start - persistentStore.addTime,
+				subtitle,
+				seek,
+			)
 		}
 	}
 	/**
 	 * Will subtract time from the given (or the active one if not provided) subtitle's end numeric time
 	 */
 	subtractEndTime(subtitle?: sub.Subtitle, seek = true) {
-		if (!subtitle) {
-			subtitle = this.getActiveSubtitle()
-		}
+		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
-			subtitle.end -= persistentStore.subtractTime
-			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
-			if (seek) {
-				videoUI.playFromTo(
-					subtitle.end - persistentStore.subEndTimeReplayLengthS,
-					subtitle.end,
-				)
-			}
-			this.save()
+			this.setStartTime(
+				subtitle.end - persistentStore.subtractTime,
+				subtitle,
+				seek,
+			)
 		}
 	}
 	/**
 	 * Will add time from the given (or the active one if not provided) subtitle's end numeric time
 	 */
 	addEndTime(subtitle?: sub.Subtitle, seek = true) {
-		if (!subtitle) {
-			subtitle = this.getActiveSubtitle()
-		}
+		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
-			subtitle.end += persistentStore.subtractTime
-			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
-			if (seek) {
-				videoUI.playFromTo(
-					subtitle.end - persistentStore.subEndTimeReplayLengthS,
-					subtitle.end,
-				)
-			}
-			this.save()
+			this.setEndTime(subtitle.end + persistentStore.addTime, subtitle, seek)
 		}
 	}
 }
