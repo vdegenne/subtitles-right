@@ -15,6 +15,8 @@ import {store} from './store.js'
 import './subtitle-element.js'
 import {type SubtitleElement} from './subtitle-element.js'
 import {videoUI} from './video-element.js'
+import {openFillEmptySubtitlesDialog} from './imports.js'
+import {start} from 'repl'
 
 export interface AddSubtitleOptions {
 	/**
@@ -52,27 +54,37 @@ class SubtitlesElement extends LitElement {
 			${guard([store.videoPath], () =>
 				until(this.#loadSubtitles(), 'Loading...'),
 			)}
-			${repeat(
-				this.subtitles,
-				(s) => s.id,
-				(s, i) => {
-					return html`<!-- -->
-						<div class="relative">
-							<span
-								class="absolute top-0 left-1 text-[var(--md-sys-color-primary)] opacity-50"
-								>${i}</span
-							><subtitle-element .subtitle=${s}></subtitle-element>
-						</div>
-						<!-- -->`
-				},
-			)}
+			<div id="subtitles" class="mb-5">
+				${repeat(
+					this.subtitles,
+					(s) => s.id,
+					(s, i) => {
+						return html`<!-- -->
+							<div class="relative">
+								<span
+									class="absolute top-0 left-1 text-[var(--md-sys-color-primary)] opacity-50"
+									>${i}</span
+								><subtitle-element .subtitle=${s}></subtitle-element>
+							</div>
+							<!-- -->`
+					},
+				)}
+			</div>
 			${this.subtitles.length === 0
 				? html`<!-- -->
 						<div class="my-24 text-center">
 							<wavy-text>No subtitles yet.</wavy-text>
 						</div>
 						<!-- -->`
-				: null}
+				: html`<!-- -->
+						<md-assist-chip
+							elevated
+							@click=${() => openFillEmptySubtitlesDialog()}
+						>
+							<md-icon slot="icon">water_full</md-icon>
+							Fill empty subtitles
+						</md-assist-chip>
+						<!-- -->`}
 			<!-- -->`
 	}
 
@@ -217,7 +229,6 @@ class SubtitlesElement extends LitElement {
 		return
 	}
 	save() {
-		return
 		this.injectSubtitles()
 		return this.#saveDebouncer.call()
 	}
@@ -323,12 +334,18 @@ class SubtitlesElement extends LitElement {
 		// }
 	}
 
+	updateElements(start: number, end?: number) {
+		if (!end) end = start
+		const elements = [...this.subtitleElements].slice(start, end + 1)
+		elements.forEach((el) => el.requestUpdate())
+	}
+
 	setStartTime(time: sub.NumericTime, subtitle?: sub.Subtitle, seek = true) {
 		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
 			subtitle.start = time
 			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
+			this.updateElements(index)
 			if (seek) {
 				videoUI.playSubtitle(subtitle)
 			}
@@ -341,7 +358,7 @@ class SubtitlesElement extends LitElement {
 			subtitle.end = time
 			// TODO: We should make sure the video lookup time is updated to avoid over play
 			const index = this.subtitles.indexOf(subtitle)
-			this.subtitleElements[index]!.requestUpdate()
+			this.updateElements(index)
 			if (seek) {
 				videoUI.playFromTo(
 					subtitle.end - persistentStore.subEndTimeReplayLengthS,
@@ -398,6 +415,57 @@ class SubtitlesElement extends LitElement {
 		subtitle ??= this.getActiveSubtitle()
 		if (subtitle) {
 			this.setEndTime(subtitle.end + persistentStore.addTime, subtitle, seek)
+		}
+	}
+
+	getAllLastEmptySubtitles() {
+		const subtitles = this.subtitles
+		const result: sub.Subtitle[] = []
+		for (let i = subtitles.length - 1; i >= 0; i--) {
+			if (subtitles[i]!.text === '') {
+				result.unshift(subtitles[i]!) // add to the start of result to maintain original order
+			} else {
+				break // stop once we hit a non-empty text
+			}
+		}
+		return result
+	}
+
+	/**
+	 * Fill all last empty subtitles with the input.
+	 * The input should contain new lines (\n) to be able to understand how to cut.
+	 * All cut lines will go sequentially from last first empty subtitle to last last empty subtitle found.
+	 * Use wisely!
+	 */
+	fillEmptySubtitles(input: string = 'test', trimSurroundingNewLines = true) {
+		let lines = input.split('\n')
+
+		if (trimSurroundingNewLines) {
+			// Remove leading and trailing empty lines using regex
+			const trimmedInput = input.replace(/^(?:\s*\n)+|(?:\n\s*)+$/g, '')
+			lines = trimmedInput.split('\n')
+		}
+
+		const emptySubtitles = this.getAllLastEmptySubtitles()
+		if (lines.length !== emptySubtitles.length) {
+			const msg =
+				"The input lines length doesn't match the length of last empty subtitles."
+			toast(msg)
+			logger.warn(msg)
+			return
+		}
+
+		for (const sub of emptySubtitles) {
+			sub.text = lines[0] as string
+			lines.shift()
+		}
+
+		const startIndex = this.subtitles.indexOf(emptySubtitles[0]!)
+		const endIndex = this.subtitles.indexOf(
+			emptySubtitles[emptySubtitles.length - 1]!,
+		)
+		if (startIndex >= 0 && endIndex >= 0) {
+			this.updateElements(startIndex, endIndex)
 		}
 	}
 }

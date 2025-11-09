@@ -107,8 +107,17 @@ class GamepadController extends ReactiveController {
 						switch (mode) {
 							case Mode.NORMAL:
 								if (videoUI.isPlaying() && videoUI.lookupTime) {
+									// Making sure the lookup time is updated
+									const active = subtitlesUI.getActiveSubtitle()
+									if (active) {
+										videoUI.lookupTime = active.end
+									}
 									videoUI.pause()
 								} else if (!videoUI.isPlaying() && videoUI.lookupTime) {
+									const active = subtitlesUI.getActiveSubtitle()
+									if (active) {
+										videoUI.lookupTime = active.end
+									}
 									videoUI.play()
 								} else {
 									const active = subtitlesUI.getActiveSubtitle()
@@ -154,27 +163,33 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
+			// DPAD_UP
 			gamepad.for(map.LEFT_BUTTONS_TOP).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
 						videoUI.pause()
-						subtitlesUI.activatePrevious()
+						videoUI.lookupTime = undefined
+						subtitlesUI.activatePrevious(false)
 						break
 					case Mode.PRIMARY:
 						videoUI.pause()
-						subtitlesUI.activateFirst()
+						videoUI.lookupTime = undefined
+						subtitlesUI.activateFirst(false)
 						break
 				}
 			})
+			// DPAD_DOWN
 			gamepad.for(map.LEFT_BUTTONS_BOTTOM).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
 						videoUI.pause()
-						subtitlesUI.activateNext()
+						videoUI.lookupTime = undefined
+						subtitlesUI.activateNext(false)
 						break
 					case Mode.PRIMARY:
 						videoUI.pause()
-						subtitlesUI.activateLast()
+						videoUI.lookupTime = undefined
+						subtitlesUI.activateLast(false)
 						break
 				}
 			})
@@ -185,10 +200,8 @@ class GamepadController extends ReactiveController {
 					case Mode.NORMAL:
 						subtitlesUI.subtractStartTime()
 						break
-					case Mode.PRIMARY:
+					case Mode.SECONDARY:
 						subtitlesUI.subtractEndTime()
-						break
-					case Mode.TERTIARY:
 						break
 				}
 			})
@@ -198,10 +211,8 @@ class GamepadController extends ReactiveController {
 					case Mode.NORMAL:
 						subtitlesUI.addStartTime()
 						break
-					case Mode.PRIMARY:
+					case Mode.SECONDARY:
 						subtitlesUI.addEndTime()
-						break
-					case Mode.TERTIARY:
 						break
 				}
 			})

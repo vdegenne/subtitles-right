@@ -1,9 +1,33 @@
-import type {TemplateResult} from 'lit-html';
-import '@material/web/button/text-button.js';
+import type {TemplateResult} from 'lit-html'
+import '@material/web/button/text-button.js'
+import toast from 'toastit'
 
 interface Options {
-	headline: string;
-	content: string | TemplateResult;
+	headline: string
+	content: string | TemplateResult
+}
+
+function dialog(
+	headline: string | TemplateResult,
+	content: string | TemplateResult,
+) {
+	return new Promise(async (resolve, reject) => {
+		const {materialDialog} = await import('material-3-dialog')
+		materialDialog({
+			headline,
+			content(dialog) {
+				dialog.addEventListener('closed', () => {
+					// resolve is called first on confirm so it's fine.
+					reject()
+				})
+				return content
+			},
+			confirmButton(dialog) {
+				resolve(dialog)
+				dialog.close()
+			},
+		})
+	})
 }
 
 export function confirm({
@@ -13,22 +37,19 @@ export function confirm({
 	return function (
 		_target: any,
 		_propertyKey: string,
-		descriptor: PropertyDescriptor
+		descriptor: PropertyDescriptor,
 	) {
-		import('./material/dialog-patch.js');
-		const originalMethod = descriptor.value;
+		import('./material/dialog-patch.js')
+		const originalMethod = descriptor.value
 		descriptor.value = async function (...args: any[]) {
-			const {materialConfirm} = await import('material-3-prompt-dialog');
 			try {
-				await materialConfirm({
-					headline,
-					content,
-				});
+				await dialog(headline, content)
 			} catch {
-				return;
+				// Canceled just ignore
+				return
 			}
-			return originalMethod.apply(this, args);
-		};
-		return descriptor;
-	};
+			return originalMethod.apply(this, args)
+		}
+		return descriptor
+	}
 }

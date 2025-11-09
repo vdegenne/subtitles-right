@@ -13,6 +13,7 @@ import {store} from './store.js'
 import {sleep} from './utils.js'
 import {logger} from './logger.js'
 import {subtitlesUI} from './subtitles-element.js'
+import {openTerminal} from './server/functions.js'
 
 MdLinearProgress.elementStyles.push(css`
 	.bar {
@@ -86,6 +87,14 @@ class VideoElement extends LitElement {
 							<md-filled-tonal-icon-button ?invisible=${!this.lookupTime}>
 								<md-icon>timer</md-icon>
 							</md-filled-tonal-icon-button>
+						</div>
+						<div id="actions" class="m-4">
+							<md-icon-button @click=${() => store.openDirectory()}
+								><md-icon>folder_open</md-icon></md-icon-button
+							>
+							<md-icon-button @click=${() => store.openTerminal()}
+								><md-icon>terminal</md-icon></md-icon-button
+							>
 						</div>
 						<!-- -->`
 				: null}

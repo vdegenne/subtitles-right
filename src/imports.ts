@@ -45,3 +45,11 @@ export async function openYtDlpDialog() {
 	const dialog = new YtDlpDialog()
 	dialog.show()
 }
+
+export async function openFillEmptySubtitlesDialog() {
+	const {FillEmptySubtitlesDialog} = await import(
+		'./fill-empty-subtitles-dialog.js'
+	)
+	const dialog = new FillEmptySubtitlesDialog()
+	dialog.show()
+}

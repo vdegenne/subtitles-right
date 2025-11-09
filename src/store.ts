@@ -4,6 +4,7 @@ import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
 import chalk from 'chalk'
 // import { saveToLocalStorage } from 'snar-save-to-local-storage'
 import {availablePages, Page} from './pages/index.js'
+import {api} from './api.js'
 
 const logger = new Logger({
 	colors: {
@@ -35,6 +36,17 @@ export class AppStore extends ReactiveController {
 					.catch(() => {})
 			}
 		}
+	}
+
+	openDirectory() {
+		if (!this.videoPath) return
+		api.get(`/open/${encodeURIComponent(this.videoPath)}` as '/open/:path')
+	}
+	openTerminal() {
+		if (!this.videoPath) return
+		api.get(
+			`/terminal/${encodeURIComponent(this.videoPath)}` as '/terminal/:path',
+		)
 	}
 }
 
