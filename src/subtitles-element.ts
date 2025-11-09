@@ -235,7 +235,6 @@ class SubtitlesElement extends LitElement {
 
 	deleteSubtitle(subtitle: sub.Subtitle) {
 		this.subtitles = this.subtitles.filter((s) => s.id !== subtitle.id)
-		console.log(this.subtitles)
 		this.save()
 	}
 
@@ -467,6 +466,7 @@ class SubtitlesElement extends LitElement {
 		if (startIndex >= 0 && endIndex >= 0) {
 			this.updateElements(startIndex, endIndex)
 		}
+		this.save()
 	}
 }
 
