@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {subtitlesToVTT} from '@vdegenne/subtitles'
+import {subtitlesToSRT} from '@vdegenne/subtitles'
 import fs, {writeFileSync} from 'fs'
 import pathlib from 'path'
 import {SUBTITLES_FILENAME} from './constants.js'
@@ -10,5 +10,5 @@ if (pwd) {
 		throw new Error('No subtitles file found in this directory.')
 	}
 	const subtitles = JSON.parse(fs.readFileSync(subFilepath).toString())
-	writeFileSync('sub.vtt', subtitlesToVTT(subtitles))
+	writeFileSync('sub.srt', subtitlesToSRT(subtitles))
 }

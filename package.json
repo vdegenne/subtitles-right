@@ -47,7 +47,8 @@
 		"wireit": "^0.14.12"
 	},
 	"bin": {
-		"make-vtt": "./lib/make-vtt.js"
+		"make-vtt": "./lib/make-vtt.js",
+		"make-srt": "./lib/make-srt.js"
 	},
 	"scripts": {
 		"dev": "wireit",
