@@ -2,7 +2,7 @@
 	/* --md-icon-font: 'Material Symbols Rounded'; */
 	--md-list-container-color: transparent;
 	-webkit-tap-highlight-color: transparent;
-	--md-elevation-level: 2;
+	--md-elevation-level: 2 !important;
 
 	--video-container-width: 500px;
 }

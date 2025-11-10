@@ -6,6 +6,8 @@ import {store} from './store.js'
 import {videoUI} from './video-element.js'
 import {AddSubtitleOptions, subtitlesUI} from './subtitles-element.js'
 import {persistentStore} from './persistentStore.js'
+import {pageCompose} from './pages/page-compose.js'
+import {app} from './app-shell/app-shell.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined
@@ -148,6 +150,9 @@ class GamepadController extends ReactiveController {
 								}
 								break
 						}
+						break
+					case 'compose':
+						app.pageCompose.togglePlay()
 						break
 				}
 			})

@@ -1,9 +1,9 @@
-import {Hash, Router} from '@vdegenne/router'
-import {Page} from './pages/index.js'
-import {store} from './store.js'
 import {Logger} from '@vdegenne/debug'
+import {Hash, Router} from '@vdegenne/router'
 import chalk from 'chalk'
 import {fs} from './fssystem.js'
+import {Page} from './pages/index.js'
+import {store} from './store.js'
 import {trim} from './utils.js'
 
 export const hash = new Hash<{fspath: string}>({
@@ -31,9 +31,9 @@ export const router = new Router(async ({location, parts}) => {
 			fs.current = fspath
 		}
 	} else {
-		if (parts[0] === 'video') {
-			store.videoPath = decodeURIComponent(parts.slice(1).join('/'))
-		}
 		store.page = parts[0] as Page
+		if (parts[0] === 'video' || parts[0] === 'compose') {
+			store.projectPath = decodeURIComponent(parts.slice(1).join('/'))
+		}
 	}
 })

@@ -16,5 +16,5 @@
 			"@vdegenne/subtitles"
 		]
 	},
-	"include": ["./src/**/*.ts", "./types.d.ts"]
+	"include": ["./src/**/*.ts", "./dist/data/**/*.ts", "./types.d.ts"]
 }

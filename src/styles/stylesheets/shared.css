@@ -61,8 +61,8 @@
 } */
 
 .jp {
-	font-family: 'Noto Serif JP';
 	font-family: 'Zen Maru Gothic';
+	font-family: 'Noto Serif JP';
 	/* position: relative; */
 	/* top: -2px; */
 	font-weight: var(--jp-font-weight, 400);

@@ -2,7 +2,7 @@ import {cquerySelector} from 'html-vision'
 import {PageMain} from './page-main.js'
 import {PageVideo} from './page-video.js'
 
-export const availablePages = ['main', 'video'] as const
+export const availablePages = ['main', 'video', 'compose'] as const
 export type Page = (typeof availablePages)[number]
 
 export function getPage(name: Page) {

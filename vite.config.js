@@ -48,6 +48,7 @@ plugins.push(
 		// pathToDefaultMaterialStyleSheet: './src/styles/stylesheets/material.css',
 	}),
 	materialAll({
+		include: ['./dist/data/**/*.ts'],
 		//includeComments: true
 	}),
 	mdicon2svg({
@@ -153,7 +154,8 @@ export default defineConfig({
 		// 	cert: fs.readFileSync('./ssl/server.crt'),
 		// },
 		watch: {
-			ignored: ['**/dist/data/**'], // ignore all files in dist/data
+			ignored: ['**/dist/data/**/*.json'], // ignore all files in dist/data
+			// include: ['**/dist/data/*.{html,ts}'],
 		},
 	},
 	build: {

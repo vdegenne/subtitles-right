@@ -8,6 +8,7 @@ import {customElement, property, query} from 'lit/decorators.js'
 import {deleteSubtitle} from './dialogs.js'
 import {subtitlesUI} from './subtitles-element.js'
 import {videoUI} from './video-element.js'
+import './subtitle-input.js'
 
 @customElement('subtitle-element')
 @withStyles(css`
@@ -52,8 +53,14 @@ export class SubtitleElement extends LitElement {
 								>${this.endTimecode}</span
 							>
 						</div>
-						<div slot="headline" contenteditable="true" @input=${this.#onInput}>
-							${this.subtitle!.text}
+						<div slot="headline">
+							<!--<span contenteditable="true" @input=${this.#onInput}
+								>${this.subtitle!.text}</span
+							>-->
+							<subtitle-input
+								text=${this.subtitle!.text}
+								@input=${this.#onInput}
+							></subtitle-input>
 						</div>
 						<md-icon-button tabindex="-1" slot="end" @click=${() => null}
 							><md-icon>edit</md-icon></md-icon-button
@@ -85,9 +92,9 @@ export class SubtitleElement extends LitElement {
 		return this.hasAttribute('active')
 	}
 
-	#onInput = (event: Event) => {
-		const target = event.target as HTMLElement
-		this.subtitle!.text = target.textContent.trim()
+	#onInput = (event: CustomEvent) => {
+		// const target = event.target as HTMLElement
+		this.subtitle!.text = event.detail.text
 		subtitlesUI.activateOnly(this.subtitle!, true)
 		subtitlesUI.save()
 	}

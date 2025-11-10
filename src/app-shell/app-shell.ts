@@ -2,11 +2,12 @@ import '@material/mwc-top-app-bar'
 import {withController} from '@snar/lit'
 import {html, type PropertyValues} from 'lit'
 import {withStyles} from 'lit-with-styles'
-import {customElement} from 'lit/decorators.js'
+import {customElement, query} from 'lit/decorators.js'
 import {MaterialShellChild} from 'material-shell/MaterialShellChild'
+import {availablePages} from '../pages/index.js'
+import {type PageCompose} from '../pages/page-compose.js'
 import {store} from '../store.js'
 import styles from './app-shell.css?inline'
-import {availablePages} from '../pages/index.js'
 
 declare global {
 	interface Window {
@@ -21,10 +22,13 @@ declare global {
 @withStyles(styles)
 @withController(store)
 export class AppShell extends MaterialShellChild {
+	@query('page-compose') pageCompose!: PageCompose
+
 	render() {
 		return html`<!-- -->
 			<page-main ?active=${store.page === 'main'}></page-main>
 			<page-video ?active=${store.page === 'video'}></page-video>
+			<page-compose ?active=${store.page === 'compose'}></page-compose>
 			<page-404 ?active=${!availablePages.includes(store.page)}></page-404>
 			<!-- -->`
 	}

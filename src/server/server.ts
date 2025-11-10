@@ -1,3 +1,4 @@
+import mount from 'koa-mount'
 import {Logger} from '@vdegenne/debug'
 import {config} from '@vdegenne/koa'
 import {video} from '@vdegenne/koa/middlewares/video.js'

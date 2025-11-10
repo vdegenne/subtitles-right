@@ -51,7 +51,7 @@ class SubtitlesElement extends LitElement {
 	render() {
 		logger.log('RENDER')
 		return html`<!-- -->
-			${guard([store.videoPath], () =>
+			${guard([store.projectPath], () =>
 				until(this.#loadSubtitles(), 'Loading...'),
 			)}
 			<div id="subtitles" class="mb-5">
@@ -62,7 +62,7 @@ class SubtitlesElement extends LitElement {
 						return html`<!-- -->
 							<div class="relative">
 								<span
-									class="absolute top-0 left-1 text-[var(--md-sys-color-primary)] opacity-50"
+									class="absolute top-0 left-1 text-(--md-sys-color-primary) opacity-50"
 									>${i}</span
 								><subtitle-element .subtitle=${s}></subtitle-element>
 							</div>
@@ -98,11 +98,11 @@ class SubtitlesElement extends LitElement {
 	}
 
 	async #loadSubtitles() {
-		if (!store.videoPath) {
+		if (!store.projectPath) {
 			return 'Path not provided.'
 		}
 		const {ok, json} = await api.get(
-			`/subtitles/${encodeURIComponent(store.videoPath)}` as '/subtitles/:path',
+			`/subtitles/${encodeURIComponent(store.projectPath)}` as '/subtitles/:path',
 		)
 		if (!ok) {
 			// toast("Couldn't load the subtitles")
@@ -219,7 +219,7 @@ class SubtitlesElement extends LitElement {
 
 	async #save() {
 		const {ok, text} = await api.put(
-			`/subtitles/${encodeURIComponent(store.videoPath!)}` as '/subtitles/:path',
+			`/subtitles/${encodeURIComponent(store.projectPath!)}` as '/subtitles/:path',
 			this.subtitles,
 		)
 		if (!ok) {

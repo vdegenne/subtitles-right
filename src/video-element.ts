@@ -73,7 +73,7 @@ class VideoElement extends LitElement {
 	render() {
 		logger.log('RENDER')
 		return html`<!-- -->
-			${guard([store.videoPath], () =>
+			${guard([store.projectPath], () =>
 				until(this.#renderVideoElement(), 'Loading...'),
 			)}
 			${this.hasVideo
@@ -107,11 +107,11 @@ class VideoElement extends LitElement {
 		logger.log('Render guarded video element')
 		this.hasVideo = false
 		// TODO: need to guard that (store.videoPath)
-		if (!store.videoPath) {
+		if (!store.projectPath) {
 			return 'Path not provided.'
 		}
 		const {ok, text} = await api.get(
-			`/video/${encodeURIComponent(store.videoPath)}` as '/video/:path',
+			`/video/${encodeURIComponent(store.projectPath)}` as '/video/:path',
 		)
 		if (!ok) {
 			this.hasVideo = false
@@ -122,13 +122,13 @@ class VideoElement extends LitElement {
 					<p>Video couldn't be found for this project.</p>
 					<div class="flex gap-3">
 						<md-filled-tonal-button
-							@click=${() => fs.openDirectory(store.videoPath)}
+							@click=${() => fs.openDirectory(store.projectPath)}
 						>
 							<md-icon slot="icon">folder</md-icon>
 							Open directory
 						</md-filled-tonal-button>
 						<md-filled-tonal-button
-							@click=${() => fs.openTerminal(store.videoPath)}
+							@click=${() => fs.openTerminal(store.projectPath)}
 						>
 							<md-icon slot="icon">terminal</md-icon>
 							Open terminal
@@ -150,7 +150,7 @@ class VideoElement extends LitElement {
 		})
 		return html`<!-- -->
 			<video
-				src="/api/${await text()}"
+				src="/api/videos/${await text()}"
 				@playing=${this.#startTimeUpdate}
 				@pause=${this.#stopTimeUpdate}
 				@ended=${this.#stopTimeUpdate}
