@@ -16,11 +16,23 @@ export async function getVideoPath(projectPath: string) {
 }
 
 export async function getSubtitles(projectPath: string) {
-	const {ok, json} = await api.get(
+	const {ok, json, text} = await api.get(
 		`/subtitles/${encodeURIComponent(projectPath)}` as '/subtitles/:path',
 	)
 	if (!ok) {
+		toast(await text())
 		throw new Error("Can't load the subtitles for this project.")
+	}
+	return await json()
+}
+
+export async function getMeta(projectPath: string) {
+	const {ok, json, text} = await api.get(
+		`/meta/${encodeURIComponent(projectPath)}` as '/meta/:path',
+	)
+	if (!ok) {
+		toast(await text())
+		throw new Error("Couldn't load project metadata")
 	}
 	return await json()
 }

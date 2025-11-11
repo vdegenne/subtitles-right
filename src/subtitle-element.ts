@@ -21,9 +21,6 @@ import './subtitle-input.js'
 	:host([active]) md-list-item {
 		background-color: var(--md-sys-color-surface-container-highest);
 	}
-	[contenteditable]:focus {
-		outline: none;
-	}
 `)
 export class SubtitleElement extends LitElement {
 	@property({type: Object}) subtitle: sub.Subtitle | undefined
@@ -60,6 +57,7 @@ export class SubtitleElement extends LitElement {
 							<subtitle-input
 								text=${this.subtitle!.text}
 								@input=${this.#onInput}
+								@click=${() => subtitlesUI.activateOnly(this.subtitle!)}
 							></subtitle-input>
 						</div>
 						<md-icon-button tabindex="-1" slot="end" @click=${() => null}

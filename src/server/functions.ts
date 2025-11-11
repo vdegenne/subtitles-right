@@ -8,48 +8,58 @@ import {
 	TERMINAL_BIN_NAME,
 	VIDEO_EXTENSIONS,
 } from './constants.js'
-import {DirectoryNotFoundError} from './errors.js'
+import {DirectoryNotFoundError, FileNotFoundError} from './errors.js'
 
 // Function to read meta.json and return a Project
-function readProjectMeta(
-	dirPath: string,
+export function getMeta(
+	relativePath: string,
 ): subright.ProjectInterface | undefined {
-	const metaPath = pathlib.join(dirPath, META_FILENAME)
-	if (!fs.existsSync(metaPath)) return undefined
-
-	try {
-		const raw = fs.readFileSync(metaPath, 'utf-8')
-		const data = JSON.parse(raw)
-		// Ensure it matches Project type minimally
-		return data
-	} catch (e) {
-		console.error('Failed to read meta.json in', dirPath, e)
+	const metapath = pathlib.join(DATA_ROOT, relativePath, META_FILENAME)
+	if (!fs.existsSync(metapath)) {
+		throw new FileNotFoundError(metapath)
 	}
-	return undefined
+
+	// try {
+	const raw = fs.readFileSync(metapath, 'utf-8')
+	const data = JSON.parse(raw)
+	return data
+	// } catch (e) {
+	// 	throw new Error('Failed to read meta.json')
+	// }
+	// return undefined
 }
 
 // Recursive function to list all directories and build ProjectFSItem list
 export function listProjectFSItems(
-	dirPath = DATA_ROOT,
+	dirpath = DATA_ROOT,
 ): subright.ProjectFSItem[] {
 	const items: subright.ProjectFSItem[] = []
-	const entries = fs.readdirSync(dirPath, {withFileTypes: true})
+	const entries = fs.readdirSync(dirpath, {withFileTypes: true})
 
 	for (const entry of entries) {
 		if (entry.isDirectory()) {
-			const fullPath = pathlib.join(dirPath, entry.name)
-			const stats = fs.statSync(fullPath)
+			const fullpath = pathlib.join(dirpath, entry.name)
+			const stats = fs.statSync(fullpath)
 
-			const project = readProjectMeta(fullPath)
+			let project: subright.ProjectInterface | undefined
+			try {
+				project = getMeta(fullpath)
+			} catch (err) {
+				if (err instanceof FileNotFoundError) {
+					project = undefined
+				} else {
+					throw err
+				}
+			}
 
 			items.push({
-				path: pathlib.relative(DATA_ROOT, fullPath), // relative path
+				path: pathlib.relative(DATA_ROOT, fullpath), // relative path
 				project,
 				creationTime: Math.floor(stats.birthtimeMs / 1000), // unix timestamp in seconds
 				updateTime: Math.floor(stats.mtimeMs / 1000),
 			})
 
-			items.push(...listProjectFSItems(fullPath))
+			items.push(...listProjectFSItems(fullpath))
 		}
 	}
 

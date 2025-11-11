@@ -4,7 +4,7 @@ import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
 import chalk from 'chalk'
 // import { saveToLocalStorage } from 'snar-save-to-local-storage'
 import {availablePages, Page} from './pages/index.js'
-import {api, getVideoPath} from './api.js'
+import {api, getMeta, getVideoPath} from './api.js'
 
 const logger = new Logger({
 	colors: {
@@ -21,11 +21,12 @@ const logger = new Logger({
 export class AppStore extends ReactiveController {
 	@state() projectPath: string | undefined
 	@state() videoPath: string | undefined
+	@state() meta: subright.ProjectInterface | undefined
 	@state() page: Page = 'main'
 
 	F = new FormBuilder(this)
 
-	protected async updated(changed: PropertyValues<this>) {
+	protected updated(changed: PropertyValues<this>) {
 		// TODO: if the page is a video, we can load information about it.
 		if (changed.has('page')) {
 			const page = availablePages.includes(this.page) ? this.page : '404'
@@ -40,10 +41,16 @@ export class AppStore extends ReactiveController {
 				(this.page === 'video' || this.page === 'compose') &&
 				this.projectPath
 			) {
-				const videoPath = await getVideoPath(this.projectPath)
-				if (videoPath) {
-					this.videoPath = videoPath
-				}
+				getVideoPath(this.projectPath).then((videoPath) => {
+					if (videoPath) {
+						this.videoPath = videoPath
+					}
+				})
+			}
+			if (changed.has('projectPath') && this.projectPath) {
+				getMeta(this.projectPath).then((meta) => {
+					this.meta = meta
+				})
 			}
 		}
 	}

@@ -14,6 +14,7 @@ import {sleep} from './utils.js'
 import {logger} from './logger.js'
 import {subtitlesUI} from './subtitles-element.js'
 import {openTerminal} from './server/functions.js'
+import {getComposePageURL} from './router.js'
 
 MdLinearProgress.elementStyles.push(css`
 	.bar {
@@ -94,6 +95,9 @@ class VideoElement extends LitElement {
 							>
 							<md-icon-button @click=${() => store.openTerminal()}
 								><md-icon>terminal</md-icon></md-icon-button
+							>
+							<md-icon-button href="${getComposePageURL(store.projectPath!)}"
+								><md-icon primary>imagesearch_roller</md-icon></md-icon-button
 							>
 						</div>
 						<!-- -->`
@@ -259,19 +263,28 @@ class VideoElement extends LitElement {
 		this.#onTimeUpdate()
 	}
 
+	#currentSubtitleUrl: string | null = null
 	loadSubtitles(subtitles: sub.Subtitles) {
 		const vtt = subtitlesToVTT(subtitles)
 
-		// Create a Blob URL for the VTT content
+		// Revoke old blob URL if any
+		if (this.#currentSubtitleUrl) {
+			URL.revokeObjectURL(this.#currentSubtitleUrl)
+			this.#currentSubtitleUrl = null
+		}
+
+		// Create new Blob URL
 		const blob = new Blob([vtt], {type: 'text/vtt'})
 		const url = URL.createObjectURL(blob)
+		this.#currentSubtitleUrl = url
 
-		// Remove existing text tracks if needed
-		Array.from(this.#videoElement!.textTracks).forEach((track) => {
-			track.mode = 'disabled'
-		})
+		// Remove existing subtitle tracks
+		const existingTracks = this.#videoElement!.querySelectorAll(
+			'track[kind="subtitles"]',
+		)
+		existingTracks.forEach((t) => t.remove())
 
-		// Create a new track element
+		// Create and append new track
 		const trackEl = document.createElement('track')
 		trackEl.kind = 'subtitles'
 		trackEl.label = 'English'

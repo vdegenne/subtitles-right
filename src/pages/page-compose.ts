@@ -8,7 +8,7 @@ import {logger} from '../logger.js'
 import {store} from '../store.js'
 import '../styles/themeStore.ts'
 import {PageElement} from './PageElement.js'
-import {api, getSubtitles} from '../api.js'
+import {api, getMeta, getSubtitles} from '../api.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -47,6 +47,7 @@ export class PageCompose extends PageElement {
 									.subtitles=${subtitles}
 									.projectPath=${store.projectPath}
 									.videoPath=${store.videoPath}
+									.meta=${store.meta}
 								></compose-view>
 								<!-- -->`
 						}
@@ -85,4 +86,4 @@ export class PageCompose extends PageElement {
 	}
 }
 
-export const pageCompose = new PageCompose()
+// export const pageCompose = new PageCompose()

@@ -1,7 +1,7 @@
 declare global {
 	namespace subright {
 		interface ProjectInterface {
-			// name: string
+			name?: string
 			youtube: string | null
 		}
 

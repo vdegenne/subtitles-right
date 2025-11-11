@@ -15,6 +15,7 @@ import {
 	listProjectFSItems,
 	openDirectory,
 	openTerminal,
+	getMeta,
 	saveSubtitles,
 } from './functions.js'
 import {DirectoryNotFoundError} from './errors.js'
@@ -70,6 +71,10 @@ config<SubtitlesRightAPI>({
 			} catch {
 				return []
 			}
+		},
+
+		'/meta/:path'({ctx, guard, params}) {
+			return getMeta(params.path!)
 		},
 	},
 

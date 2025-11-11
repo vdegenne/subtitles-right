@@ -37,3 +37,7 @@ export const router = new Router(async ({location, parts}) => {
 		}
 	}
 })
+
+export function getComposePageURL(projectPath: string) {
+	return `/compose/${projectPath}`
+}

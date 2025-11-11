@@ -10,6 +10,7 @@ export interface SubtitlesRightAPI {
 		'/terminal/:path': Endpoint<void, ''>
 		'/video/:path': Endpoint<void, string>
 		'/subtitles/:path': Endpoint<void, sub.Subtitles>
+		'/meta/:path': Endpoint<void, subright.ProjectInterface>
 	}
 	post: {
 		'/directories': Endpoint<{fullpath: string}, ''>
